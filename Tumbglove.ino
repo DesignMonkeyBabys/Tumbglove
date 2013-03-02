@@ -26,25 +26,70 @@
  */
 
 // Flex sensor pin
-const int sensorPin = 0;
+const int flexSensorPin = 0;
+int flexCurrentValue = 0;
 
-int currentValue = 0;
+// XY sensor pin
+const int xAxisPin = 2;
+const int yAxisPin = 3;
+int isXYZLocked = 0;
 
 void setup() {
  Keyboard.begin();
 }
 
 void loop() {
+ /**
+  * Like!
+  */
  // read Flex sensor value
- int value = analogRead(sensorPin);
+ int value = analogRead(flexSensorPin);
  
- if (value > 430 && currentValue <= 430) {
+ if (value > 430 && flexCurrentValue <= 430) {
    // LIKE!
    Keyboard.write('l');
  }
- currentValue = value;
+ flexCurrentValue = value;
+ 
+ 
+ /**
+  * Prev Next
+  */
+ // read XY sensor value 
+ int xAxisValue = analogRead(xAxisPin); 
+ int yAxisValue = analogRead(yAxisPin);
+ 
+ // 読み取った値を-1から1までの範囲にスケーリングしてsinθの値とする
+ float xAxisSinTheta = mapInFloat(xAxisValue, 306, 716, -1, 1);
+ float yAxisSinTheta = mapInFloat(yAxisValue, 306, 716, -1, 1);
+
+ // それぞれの値を-1から1までの範囲に制限する
+ xAxisSinTheta = constrain(xAxisSinTheta, -1, 1);
+ yAxisSinTheta = constrain(yAxisSinTheta, -1, 1);
+ 
+ // 逆サインを求めた結果（単位はラジアン）を度に変換
+ int xAxisTilt = floor(asin(xAxisSinTheta) * 180 / PI);
+ int yAxisTilt = floor(asin(yAxisSinTheta) * 180 / PI);
+ 
+ // 傾きによってページ送り処理を行う
+ if (xAxisTilt > -40 && xAxisTilt < 20 && yAxisTilt < -60 && isXYZLocked == 0) {
+   Keyboard.write('j');
+   isXYZLocked = 1;
+ } else if (xAxisTilt > -40 && xAxisTilt < 20 && yAxisTilt > 55 && isXYZLocked == 0) {
+   Keyboard.write('k');
+   isXYZLocked = 1;
+ } else if ((yAxisTilt > -40 && yAxisTilt < 10) || (yAxisTilt < 20 && yAxisTilt > 15)) {
+   isXYZLocked = 0; 
+ }
  
  // wait
- delay(100);
+ delay(30);
  
+}
+
+
+// 標準で用意されているmapは引数と戻り値の型がlongである
+// 今回は-1から1までにスケーリングする必要があるためfloatで同じ計算をする
+float mapInFloat(float x, float iMin, float iMax, float oMin, float oMax) {
+  return (x - iMin) * (oMax - oMin) / (iMax - iMin) + oMin;
 }
