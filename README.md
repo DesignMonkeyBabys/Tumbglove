@@ -14,4 +14,4 @@ Features
 
 Circuit Diagram
 ---------------
-<img src="https://raw.github.com/DesignMonkeyBabys/Tumbglove/master/circuit_diagram/Tumbglove_breadbord.png" alt="diagram" />
+<img src="https://raw.github.com/DesignMonkeyBabys/Tumbglove/master/circuit_diagram/Tumbglove_breadbord.jpg" alt="diagram" />
