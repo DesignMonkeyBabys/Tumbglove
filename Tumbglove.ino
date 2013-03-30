@@ -26,25 +26,43 @@
  */
 
 // Flex sensor pin
-const int sensorPin = 0;
+const int flexSensorPin = 0;
+int flexCurrentValue = 0;
 
-int currentValue = 0;
+//FSR pin
+const int pressSensorPin = 1;
+int pressCurrentValue = 0;
+char altKey = KEY_LEFT_ALT;
 
 void setup() {
- Keyboard.begin();
+  while(!Serial); //シリアルモニタが開いていたらループ開始
+  Serial.begin(9600); //シリアルポートを9600bpsで開く
+  Keyboard.begin();
 }
 
 void loop() {
- // read Flex sensor value
- int value = analogRead(sensorPin);
- 
- if (value > 430 && currentValue <= 430) {
-   // LIKE!
-   Keyboard.write('l');
- }
- currentValue = value;
- 
- // wait
- delay(100);
- 
+  int flexVal = analogRead(flexSensorPin);
+  Serial.println(flexVal); //for Debug
+  int pressVal = analogRead(pressSensorPin); 
+  Serial.println(pressVal); //for Debug
+
+  /* like */
+  if (flexVal > 430 && flexCurrentValue <= 430) {
+    // LIKE!
+    Keyboard.write('l');
+  }
+  flexCurrentValue = flexVal; 
+  delay(100);
+
+  /* reblog */
+  if(pressVal > 900 && pressCurrentValue <= 900){
+    //press Reblog shortcut 
+    Keyboard.press(altKey);
+    Keyboard.press('r');
+    Keyboard.releaseAll();
+  }
+  pressCurrentValue = pressVal;
+  delay(100);
 }
+
+
